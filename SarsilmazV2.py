@@ -9,21 +9,39 @@ import pyfiglet
 import colorama
 from colorama import Fore, Back, Style
 import socket
+from urllib.parse import urlparse
+import re
 
 # ASCII Sanatı
 def display_ascii_art():
+    # Figlet formatında "Root" metnini yazdır
     metin = "Root"
     ascii_art = pyfiglet.figlet_format(metin)
+    # Renkleri uygula (kırmızı)
     renkli_ascii = Fore.RED + ascii_art
+    
+    # colorama'yı başlat
     colorama.init()
+    
+    # ASCII sanatını yazdır
     print(renkli_ascii)
+    
+    # "t.me/sarsilmazhackteam" yazısını ASCII sanatının altına yazdır
     print(colored("t.me/sarsilmazhackteam", 'red'))
 
+# URL Doğrulama
+def validate_url(url):
+    # URL'nin http:// veya https:// ile başladığından emin ol
+    pattern = r"^https?://"
+    if not re.match(pattern, url):
+        print(f"[!] Geçersiz URL formatı: {url}. Lütfen 'http://' veya 'https://' ile başlayın.")
+        sys.exit(1)
+
 # Güvenli HTTP isteği
-def safe_request(url, method='GET', data=None, files=None):
+def safe_request(url, method='GET', data=None):
     try:
         if method == 'POST':
-            response = requests.post(url, data=data, files=files, timeout=10)
+            response = requests.post(url, data=data, timeout=10)
         else:
             response = requests.get(url, timeout=10)
         response.raise_for_status()
@@ -36,18 +54,23 @@ def safe_request(url, method='GET', data=None, files=None):
 def detect_sql_database(url):
     print(colored("[*] SQLMap ile veritabanları tespit ediliyor...", 'yellow'))
     try:
+        # sqlmap komutunu çalıştır
         command = ["sqlmap", "-u", url, "--batch", "--dbs", "--output-dir=/tmp/sqlmap_output"]
         result = subprocess.run(command, capture_output=True, text=True)
+
+        # SQLMap çıktısını sadece veritabanı isimleriyle yazdır
         if "available databases" in result.stdout.lower():
+            # Veritabanı isimlerini bul ve yazdır
             databases = []
             in_databases_section = False
             for line in result.stdout.splitlines():
+                # Filtreleme işlemi yaparak veritabanı isimlerini al
                 if "available databases" in line.lower():
                     in_databases_section = True
                     continue
                 if in_databases_section:
                     if line.strip().startswith("[*]"):
-                        continue
+                        continue  # Bu satırı atla
                     if line.strip():
                         databases.append(line.strip())
             if databases:
@@ -95,52 +118,57 @@ def test_file_inclusion(url):
 # XSS Testi
 def test_xss(url):
     payload = "<script>alert('XSS')</script>"
-    test_url = f"{url}?search={payload}"
+    test_url = f"{url}{payload}"
     response = safe_request(test_url)
     if payload in response.text:
         print(colored("[!] XSS açığı bulundu!", 'red'))
-    else:
-        print(colored("[+] XSS açığı bulunamadı.", 'green'))
+        return True
+    print(colored("[+] XSS açığı bulunamadı.", 'green'))
+    return False
 
 # CSRF Testi
 def test_csrf(url):
-    headers = {'Origin': url}
-    response = requests.post(url, headers=headers)
-    if "forbidden" in response.text.lower():
-        print(colored("[+] CSRF koruması var.", 'green'))
-    else:
-        print(colored("[!] CSRF açığı bulunabilir.", 'red'))
-
-# Port Tarama
-def scan_ports(host, ports=[80, 443, 8080, 21, 22, 3306]):
-    for port in ports:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = s.connect_ex((host, port))
-        if result == 0:
-            print(colored(f"[+] Port {port} açık.", 'green'))
+    print(colored("[*] CSRF açığı taranıyor...", 'yellow'))
+    try:
+        # Basit bir CSRF test payload'ı
+        payload = {
+            'username': 'test',
+            'password': 'test',
+            'submit': 'Submit'
+        }
+        response = requests.post(url, data=payload, timeout=10)
+        if response.status_code == 200:
+            print(colored("[!] CSRF açığı olabilir.", 'red'))
         else:
-            print(colored(f"[+] Port {port} kapalı.", 'red'))
-        s.close()
+            print(colored("[+] CSRF açığı bulunamadı.", 'green'))
+    except requests.exceptions.RequestException as e:
+        print(colored(f"[!] CSRF testi sırasında hata oluştu: {str(e)}", 'red'))
 
-# Dosya Yükleme Güvenlik Testi
-def test_file_upload(url):
-    files = {'file': ('test.php', '<?php echo "test"; ?>')}
-    response = safe_request(url, method='POST', data=None, files=files)
-    if "test" in response.text:
-        print(colored("[!] Dosya yükleme açığı bulundu!", 'red'))
-    else:
-        print(colored("[+] Dosya yükleme açığı bulunamadı.", 'green'))
+# Port Taraması
+def scan_ports(url):
+    # URL'yi parse et ve host bilgisi al
+    parsed_url = urlparse(url)
+    host = parsed_url.hostname  # Bu, URL'den sadece domain kısmını alır
 
-# WAF Tespiti
-def detect_waf(url):
-    response = safe_request(url)
-    waf_signatures = ['cf-ray', 'x-robots-tag', 'server', 'x-waf']
-    for signature in waf_signatures:
-        if signature in response.headers:
-            print(colored(f"[+] WAF tespit edildi: {signature}", 'yellow'))
-            return True
-    print(colored("[+] WAF tespit edilmedi.", 'green'))
-    return False
+    print(f"[+] Port taraması başlatılıyor: {host}")
+
+    # Test edilecek portlar (örneğin 80, 443)
+    ports = [80, 443, 8080]
+
+    for port in ports:
+        try:
+            # Socket bağlantısı kurma
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(1)  # Zaman aşımı süresi (1 saniye)
+            result = s.connect_ex((host, port))
+            
+            if result == 0:
+                print(f"[+] {host}:{port} - Bağlantı başarılı")
+            else:
+                print(f"[-] {host}:{port} - Bağlantı başarısız")
+            s.close()
+        except socket.error as e:
+            print(f"[!] Hata: {e}")
 
 # Tarama Fonksiyonu
 def scan_url(url):
@@ -151,9 +179,7 @@ def scan_url(url):
     detect_sql_database(url)
     test_xss(url)
     test_csrf(url)
-    scan_ports(url.replace("https://", "").replace("http://", ""))
-    test_file_upload(url)
-    detect_waf(url)
+    scan_ports(url)
 
 # Ana Fonksiyon
 def main():
@@ -162,9 +188,8 @@ def main():
     parser.add_argument("url", help="Taranacak URL")
     args = parser.parse_args()
 
-    if not args.url.startswith("http://") and not args.url.startswith("https://"):
-        print(colored("[!] Lütfen geçerli bir URL girin. (http:// veya https:// ile başlamalı)", 'red'))
-        sys.exit(1)
+    # URL'nin geçerli olup olmadığını kontrol et
+    validate_url(args.url)
 
     scan_url(args.url)
 
@@ -174,3 +199,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print(colored("\n[!] İşlem kullanıcı tarafından durduruldu.", 'red'))
         sys.exit(0)
+                    
