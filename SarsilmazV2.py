@@ -87,14 +87,20 @@ def detect_sql_database(url):
 # Komut Enjeksiyonu Testi
 def test_command_injection(url):
     payload = "; ls"
-    test_url = f"{url}{payload}"
-    response = safe_request(test_url)
-    if "bin" in response.text or "usr" in response.text:
-        print(colored("[!] Komut Enjeksiyonu açığı bulundu!", 'red'))
-        return True
-    print(colored("[+] Komut Enjeksiyonu açığı bulunamadı.", 'green'))
-    return False
-
+    # URL'ye payload eklerken, %20 boşluk karakterinin düzgün şekilde kodlandığından emin olun
+    test_url = f"{url}?param={payload}"
+    
+    try:
+        response = safe_request(test_url)
+        if "bin" in response.text or "usr" in response.text:
+            print(colored("[!] Komut Enjeksiyonu açığı bulundu!", 'red'))
+            return True
+        print(colored("[+] Komut Enjeksiyonu açığı bulunamadı.", 'green'))
+        return False
+    except Exception as e:
+        print(colored(f"[!] Hata oluştu: {e}", 'red'))
+        return False
+        
 # Dizin Gezinmesi Testi
 def test_open_directory(url):
     response = safe_request(url)
