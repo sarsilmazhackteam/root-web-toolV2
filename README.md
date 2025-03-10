@@ -2,7 +2,7 @@
 
 # 1337 X SARSILMAZ Web Güvenlik Tarayıcı - README
 
-Bu araç **Emin Sarsılmaz** tarafından yapılmıştır ve **Root Hack Team** ile **Sarsılmaz Hack Team** adı altında geliştirilmiştir.
+Bu araç **Emin Sarsılmaz** tarafından yapılmıştır ve **1337 Hack Team** ile **Sarsılmaz Hack Team** adı altında geliştirilmiştir.
 
 ## Genel Bakış
 Sarsilmaz Web Güvenlik Tarayıcı, web uygulamalarındaki güvenlik açıklarını tespit etmek için kullanılan bir Python aracıdır.
