@@ -1,6 +1,6 @@
-# root-web-toolV2
+# 1337 X Sarsılmaz
 
-# Sarsilmaz Web Güvenlik Tarayıcı - README
+# 1337 X SARSILMAZ Web Güvenlik Tarayıcı - README
 
 Bu araç **Emin Sarsılmaz** tarafından yapılmıştır ve **Root Hack Team** ile **Sarsılmaz Hack Team** adı altında geliştirilmiştir.
 
